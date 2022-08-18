@@ -1,60 +1,52 @@
 import styled from "styled-components/native";
-import { Text } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import { Text, StyleSheet } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useState, useRef, useEffect } from "react";
 
 export default function MyButton({ children, onPress, style, textStyle }) {
 
-    const [ripplePosition, setRippleposition] = useState({ left: 0, top: 0 });
-    const sharedValue = new useSharedValue(0);
-    const toScale = useRef(0);
-    console.log("toscale", toScale);
+    // const sharedValue = new useSharedValue(0);
+    const ripplePositonSharedValueLeft = useSharedValue(-5);
+    const ripplePositonSharedValueTop = useSharedValue(-5);
+
     const btnRef = useRef();
-    console.log("btnRef", btnRef);
+
     let rippleAnimationStyle = useAnimatedStyle(() => {
         return {
-            opacity: 1,
-            transform: [
-                {
-                    scale: 1
-                }
-            ]
+            left: ripplePositonSharedValueLeft.value,
+            top: ripplePositonSharedValueTop.value,
+
         }
     })
 
     const _handlePress = () => {
+        // console.log("called");
         if (typeof onPress === "function") {
             onPress();
         }
     }
 
     const handlePressIn = (e) => {
-        console.log(e.nativeEvent.locationX);
-        setRippleposition(
-            {
-                left: e.nativeEvent.locationX,
-                top: e.nativeEvent.locationY
-            }
-        );
+        ripplePositonSharedValueLeft.value = withTiming(e.nativeEvent.locationX - 5, { duration: 500 });
+        ripplePositonSharedValueTop.value = withTiming(e.nativeEvent.locationY - 5, { duration: 500 });
     }
 
     useEffect(() => {
-
-        console.log("btn width", btnRef.current);
+        // console.log("btn width", btnRef.current.offsetWidth);
         // toScale.current = Math.ceil((btnRef.current.offsetWidth * 2) / 10);
         // console.log("toScale", toScale.current);
     }, []);
 
 
     return (
-        <Btn testID="btn" ref={btnRef}>
+        <Btn testID="btn" ref={btnRef} onPressIn={handlePressIn} onPress={_handlePress} style={style}>
             <Text style={textStyle}>{children}</Text>
-            <RippleCircle testID="rippleCircle" ripplePosition={ripplePosition} style={rippleAnimationStyle} />
+            <Animated.View testID="rippleCircle" style={[styles.ripple, rippleAnimationStyle]} />
         </Btn>
     );
 }
 
-const Btn = styled.View`
+const Btn = styled.Pressable`
     padding:8px 10px;
     background-color:blue;
     border-radius:5px;
@@ -70,7 +62,16 @@ const RippleCircle = styled(Animated.View)`
     /* padding:5px; */
     border-radius:50%;
     position:absolute;
-    top:${(props) => `${props.ripplePosition.top - 5}px`};
-    left:${(props) => `${props.ripplePosition.left - 5}px`};
+    
    
 `;
+
+const styles = StyleSheet.create({
+    ripple: {
+        backgroundColor: "red",
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        position: "absolue"
+    }
+});
