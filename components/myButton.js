@@ -25,7 +25,7 @@ export default function MyButton({ children, onPress, style, textStyle }) {
     }
 
     const handlePressIn = (e) => {
-        // console.log(e.nativeEvent.locationX);
+        console.log(e.nativeEvent.locationX);
         setRippleposition(
             {
                 left: e.nativeEvent.locationX,
