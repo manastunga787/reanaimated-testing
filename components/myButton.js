@@ -1,18 +1,22 @@
 import styled from "styled-components/native";
 import { Text } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function MyButton({ children, onPress, style, textStyle }) {
 
     const [ripplePosition, setRippleposition] = useState({ left: 0, top: 0 });
     const sharedValue = new useSharedValue(0);
+    const toScale = useRef(0);
+    console.log("toscale", toScale);
+    const btnRef = useRef();
+    console.log("btnRef", btnRef);
     let rippleAnimationStyle = useAnimatedStyle(() => {
         return {
-            opacity: sharedValue.value,
+            opacity: 1,
             transform: [
                 {
-                    scale: sharedValue.value
+                    scale: 1
                 }
             ]
         }
@@ -34,15 +38,23 @@ export default function MyButton({ children, onPress, style, textStyle }) {
         );
     }
 
+    useEffect(() => {
+
+        console.log("btn width", btnRef.current);
+        // toScale.current = Math.ceil((btnRef.current.offsetWidth * 2) / 10);
+        // console.log("toScale", toScale.current);
+    }, []);
+
+
     return (
-        <Btn testID="btn" onPress={_handlePress} style={style} onPressIn={handlePressIn}>
+        <Btn testID="btn" ref={btnRef}>
             <Text style={textStyle}>{children}</Text>
             <RippleCircle testID="rippleCircle" ripplePosition={ripplePosition} style={rippleAnimationStyle} />
         </Btn>
     );
 }
 
-const Btn = styled.Pressable`
+const Btn = styled.View`
     padding:8px 10px;
     background-color:blue;
     border-radius:5px;
@@ -53,10 +65,12 @@ const Btn = styled.Pressable`
 
 const RippleCircle = styled(Animated.View)`
     background-color:red;
-    padding:5px;
+    width:10px;
+    height:10px;
+    /* padding:5px; */
     border-radius:50%;
     position:absolute;
-    top:${(props) => `${props.ripplePosition.top}px`};
-    left:${(props) => `${props.ripplePosition.left}px`};
+    top:${(props) => `${props.ripplePosition.top - 5}px`};
+    left:${(props) => `${props.ripplePosition.left - 5}px`};
    
 `;
